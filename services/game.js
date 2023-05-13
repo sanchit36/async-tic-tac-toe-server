@@ -1,9 +1,15 @@
-const Game = require("../models/game");
+const Game = require('../models/game');
 
 module.exports.createGame = async (user, opponent) => {
-  const players = [user, opponent];
-
   try {
+    if (!opponent) {
+      throw new Error('You need 2 players.');
+    }
+    if (opponent === user) {
+      throw new Error('You cannot play with yourself.');
+    }
+
+    const players = [user, opponent];
     let game = await Game.findOne({ players: { $all: players } });
     if (!game) game = new Game({ players, turn: user });
     await game.save();
@@ -16,7 +22,7 @@ module.exports.createGame = async (user, opponent) => {
 module.exports.getGame = async (id) => {
   try {
     const game = await Game.findById(id);
-    if (!game) throw new Error("Game not found.");
+    if (!game) throw new Error('Game not found.');
     return game;
   } catch (error) {
     throw error;
@@ -29,7 +35,7 @@ module.exports.getGames = async (userId) => {
       players: { $in: userId },
     })
       .sort({ updatedAt: -1 })
-      .populate("players", "name");
+      .populate('players', 'name');
 
     return games;
   } catch (error) {
