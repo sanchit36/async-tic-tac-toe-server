@@ -2,7 +2,7 @@ const Game = require("../models/game");
 
 module.exports.createGame = async (req, res) => {
   const { secondPlayerId } = req.body;
-  if (!secondPlayerId) {
+  if (!secondPlayerId || secondPlayerId === req.user._id) {
     return res.status(400).send("You need 2 players.");
   }
   const players = [req.user._id, secondPlayerId];
