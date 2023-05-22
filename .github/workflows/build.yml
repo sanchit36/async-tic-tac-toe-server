@@ -23,16 +23,21 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
 
-      - name: Set up Sonar Quality Gate
-        uses: dieuhd/sonar-quality-gate@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GIT_URL: "https://api.github.com"
-          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
-          SONAR_URL: ${{ secrets.SONAR_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-        with:
-          login:  ${{ secrets.SONAR_TOKEN }}
-          url: ${{ secrets.SONAR_URL }}
-          projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
+      # Check the Quality Gate status.
+    - name: SonarQube Quality Gate check
+      id: sonarqube-quality-gate-check
+      uses: sonarsource/sonarqube-quality-gate-action@master
+      # Force to fail step after specific time.
+      timeout-minutes: 5
+      env:
+       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+       SONAR_HOST_URL: ${{ secrets.SONAR_URL }} #OPTIONAL
+
+     - name: SonarQube Pull Request Comment
+       if: always()
+       uses: campos-pay/sonarqube-pr-comment@main
+       with:
+         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+         SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
+         SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECT_KEY }}
+         GITHUB-TOKEN: ${{ secrets.GITHUB_TOKEN }}
