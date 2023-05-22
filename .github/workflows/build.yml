@@ -1,0 +1,38 @@
+name: Sonarqube Scan
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - run: |
+          echo "sonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}" > sonar-project.properties
+
+      - uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
+
+      - name: Set up Sonar Quality Gate
+        uses: dieuhd/sonar-quality-gate@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_URL: "https://api.github.com"
+          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+          SONAR_URL: ${{ secrets.SONAR_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+        with:
+          login:  ${{ secrets.SONAR_TOKEN }}
+          url: ${{ secrets.SONAR_URL }}
+          projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
